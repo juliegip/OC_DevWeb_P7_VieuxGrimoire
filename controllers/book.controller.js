@@ -4,7 +4,9 @@ const fs = require('fs')
 
 exports.addBook = (req, res, next) => {
     const bookObject = JSON.parse(req.body.book)
-    console.log(bookObject)
+    if (req.file.size > 2 * 1280 * 720) {
+        return res.status(400).json({message:'Fichier trop volumineux'})
+    }
     delete bookObject._id
     delete bookObject.userId
     const book = new Book({
@@ -42,7 +44,7 @@ exports.deleteBook = (req, res, next) => {
         .then( book => {
 
             if (book.userId != req.auth.userId) {
-                res.status(401).json({message: 'Non autorisé'})
+                res.status(403).json({message: 'Non autorisé'})
             } else {
                 const filename = book.imageUrl.split('/images/')[1];
                 fs.unlink(`images/${filename}`, () => {
