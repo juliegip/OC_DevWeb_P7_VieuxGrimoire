@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const ratingSchema = mongoose.Schema({
     userId:{type: String, required:false},
-    rate: {type: Number, required:false}
+    grade: {type: Number, required:false}
 })
 
 const bookSchema = mongoose.Schema({

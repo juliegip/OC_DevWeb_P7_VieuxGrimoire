@@ -71,9 +71,34 @@ exports.getOneBook = (req, res, next) => {
 
 
 exports.getRatings = (req, res, next) => {
-    
+    Book.find().sort({averageRating:-1}).limit(3)
+        .then(books => res.status(200).json(books))
+        .catch(error => res.status(400).json({error}))
 }
 
 exports.rateBook = (req, res, next) => {
+    const ratingObject = {grade: req.body.rating, userId: req.auth.userId}
+
+    Book.findOne({_id:req.params.id})
+        .then((book) => {
+            if (book.ratings.some((ratings)=> ratings.userId === ratingObject.userId)) {
+                res.status(401).json({message:'Vous avez déjà évalué ce livre'})
+                return
+            } else {
+                book.ratings.push(ratingObject)
+                const sum = book.ratings.reduce((total,curr) => (total += curr.grade),0)
+                const averageRating = sum / book.ratings.length
+                book.averageRating = Math.round(averageRating)
+
+                Book.findOneAndUpdate({_id: req.params.id}, book, {new:true})
+                .then((updatedBook) => {
+                    res.status(201).json(updatedBook);
+                })
+                .catch((error) => res.status(400).json({ error }))
+                
+            }
+        })
+  
+        .catch(error => res.status(400).json({error}))
     
 }
