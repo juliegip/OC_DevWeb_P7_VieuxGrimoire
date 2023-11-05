@@ -15,7 +15,7 @@ app.use((req, res, next) => {
     next();
   });      
 
-app.use(express.json());  // donne accès au body de la requête (ancienne méthode : bodyparser())
+app.use(express.json()); 
 
 app.use('/api/books',bookRoutes)
 app.use('/api/auth',userRoutes)
