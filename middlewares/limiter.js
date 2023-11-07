@@ -1,16 +1,16 @@
 const rateLimit =  require("express-rate-limit")
 
- const limiter = rateLimit({
-    windowMs: 1000, // 24 hrs in milliseconds
+const limiter = rateLimit({
+    windowMs: 1000* 60 * 60  ,
     max: 5,
-    message: 'You have exceeded the 100 requests in 24 hrs limit!',
+    message: 'Trop de tentative, veuillez essayer ultérieurement',
     headers: true,
 });
 
 const loginLimiter = rateLimit({
     max: 3,
     windowMs: 10000,
-    message: "Too many login attemps, Try again later"
+    message: "Trop de tentative de connexion, veuillez essayer ultérieurement"
 })
 
 module.exports = {limiter, loginLimiter}
