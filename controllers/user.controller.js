@@ -1,13 +1,20 @@
 const bcrypt = require('bcrypt');
+const DOMPurify = require('dompurify')
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 exports.signup = async (req, res, next) => {
     try {
         const emailRegex = /^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/
+
         if (!emailRegex.test(req.body.email)) {
             return res.status(400).json({error: 'Format email invalide'})
         }
+        if (!passwordRegex.test(req.body.password)) {
+            return res.status(400).json({error:'Mot de passe invalide. Il doit contenir au moins 8 caractères et 1 chiffre'})
+        }
+
         const hash = await bcrypt.hash(req.body.password, parseInt(process.env.SALT_ROUNDS));
         const user = new User({
             email: req.body.email,
@@ -22,6 +29,7 @@ exports.signup = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
     try {
+        // const sanitizedEmail = DOMPurify.sanitize(req.body.email);
         const user = await User.findOne({email: req.body.email})
         if (user === null) {
             return res.status(401).json({message: "Identifiant et/ou mot de passe incorrect"})
@@ -29,7 +37,7 @@ exports.login = async (req, res, next) => {
 
         const valid = await bcrypt.compare(req.body.password, user.password)
         if (!valid) {
-            return res.statut(401).json({message: "Identifiant et/ou mot de passe incorrect"})
+            return res.status(401).json({message: "Identifiant et/ou mot de passe incorrect"})
         }
 
         const token = jwt.sign(
