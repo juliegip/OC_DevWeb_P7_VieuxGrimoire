@@ -2,7 +2,6 @@ const Book = require('../models/Book')
 const sharp = require ('sharp')
 const fs = require('fs').promises
 
-
 exports.addBook = async (req, res, next) => {
     try {
       const bookObject = JSON.parse(req.body.book);

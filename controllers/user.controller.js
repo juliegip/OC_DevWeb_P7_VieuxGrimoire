@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt');
-const DOMPurify = require('dompurify')
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -29,8 +28,8 @@ exports.signup = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
     try {
-        // const sanitizedEmail = DOMPurify.sanitize(req.body.email);
-        const user = await User.findOne({email: req.body.email})
+        const user = await User.findOne({ email: req.body.email })
+   
         if (user === null) {
             return res.status(401).json({message: "Identifiant et/ou mot de passe incorrect"})
         }
