@@ -3,28 +3,33 @@
 
 ### OC_Projet 7 Mon Vieux Grimoire
 
-## Built with
-
 
 ## Getting started
 
-# Prerequisites
+### Prerequisites
 
 You need the frontend provided by OC project
 
-# Installation
+### Installation
 
 1. Clone the repo :
-``` git clone https://github.com/juliegip/OC_DevWeb_P7_VieuxGrimoire.git
-
+``` 
+git clone https://github.com/juliegip/OC_DevWeb_P7_VieuxGrimoire.git
+``` 
 2. Install the dependencies
 
-``` npm install
+``` 
+npm install
+``` 
 
 3. Set the variables
-    rename the file .env.example with .env
 
-4. run the application
+    Rename the file `.env.example` with `.env`
 
-``` npm run dev
+4. Run the application backend
+
+``` 
+npm run dev
+```
+
 
