@@ -2,36 +2,44 @@ const Book = require('../models/Book')
 const sharp = require ('sharp')
 const fs = require('fs').promises
 
+checkBookFields = (book) => {
+  return book.title !== "" && book.author !=="" && book.imageUrl !=="" 
+}
+
 exports.addBook = async (req, res, next) => {
-    try {
-      const bookObject = JSON.parse(req.body.book);
+  try {
+    const bookObject = JSON.parse(req.body.book);
+      if (!checkBookFields(bookObject)) {
+          return res.status(400).json({ error: 'Les champs du formulaires sont vides' });
+      }
+
       const imageBuffer = await sharp(req.file.buffer).webp().toBuffer();
-  
+
       const imageFileName =
-        req.file.originalname.split(' ').join('_') + Date.now() + '.webp';
-  
+          req.file.originalname.split(' ').join('_') + Date.now() + '.webp';
+
       await sharp(imageBuffer)
-        .toFile('images/' + imageFileName)
-        .catch((err) => {
-          return res.status(500).json({ error: "L'image n'a pas pu être sauvegardée" });
-        });
-  
+          .toFile('images/' + imageFileName)
+          .catch((err) => {
+              return res.status(500).json({ error: "L'image n'a pas pu être sauvegardée" });
+          });
+
       delete bookObject._id;
       delete bookObject.userId;
-  
+
       const book = new Book({
-        ...bookObject,
-        userId: req.auth.userId,
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${imageFileName}`,
+          ...bookObject,
+          userId: req.auth.userId,
+          imageUrl: `${req.protocol}://${req.get('host')}/images/${imageFileName}`,
       });
-  
+
       await book.save();
-  
+
       res.status(201).json({ message: 'Livre ajouté !' });
-    } catch (error) {
+  } catch (error) {
       res.status(400).json({ error });
-    }
-  };
+  }
+};
   
 
 exports.modifyBook = async (req, res, next) => {

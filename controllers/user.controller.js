@@ -5,7 +5,7 @@ const User = require('../models/User');
 exports.signup = async (req, res, next) => {
     try {
         const emailRegex = /^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/
-        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{12,}$/
 
         if (!emailRegex.test(req.body.email)) {
             return res.status(400).json({error: 'Format email invalide'})
