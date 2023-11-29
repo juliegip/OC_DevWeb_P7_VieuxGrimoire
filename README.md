@@ -1,6 +1,4 @@
 
-![Alt text](image.png)
-
 ### OC_Projet 7 Mon Vieux Grimoire
 
 

@@ -1,5 +1,5 @@
 const Book = require('../models/Book')
-const sharp = require ('sharp')
+const processImage = require('../middlewares/processImg')
 const fs = require('fs').promises
 
 checkBookFields = (book) => {
@@ -13,58 +13,57 @@ exports.addBook = async (req, res, next) => {
           return res.status(400).json({ error: 'Les champs du formulaires sont vides' });
       }
 
-      const imageBuffer = await sharp(req.file.buffer).webp().toBuffer();
+    const imageUrl = await processImage(req.file.buffer, req);
 
-      const imageFileName =
-          req.file.originalname.split(' ').join('_') + Date.now() + '.webp';
+    const book = new Book({
+        ...bookObject,
+        userId: req.auth.userId,
+        imageUrl: imageUrl,
+    });
 
-      await sharp(imageBuffer)
-          .toFile('images/' + imageFileName)
-          .catch((err) => {
-              return res.status(500).json({ error: "L'image n'a pas pu être sauvegardée" });
-          });
+    await book.save();
 
-      delete bookObject._id;
-      delete bookObject.userId;
-
-      const book = new Book({
-          ...bookObject,
-          userId: req.auth.userId,
-          imageUrl: `${req.protocol}://${req.get('host')}/images/${imageFileName}`,
-      });
-
-      await book.save();
-
-      res.status(201).json({ message: 'Livre ajouté !' });
+    res.status(201).json({ message: 'Livre ajouté !' });
   } catch (error) {
       res.status(400).json({ error });
   }
 };
   
 
+
 exports.modifyBook = async (req, res, next) => {
-    try {
-        const bookObject = req.file
-            ? {
-                  ...JSON.parse(req.body.book),
-                  imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
-              }
-            : {
-                  ...req.body,
-              };
+  try {
+      const bookObject = req.file
+          ? {
+                ...JSON.parse(req.body.book),
+                imageUrl: await processImage(req.file.buffer, req),
+            }
+          : {
+                ...req.body,
+            };
 
-        const book = await Book.findOne({ _id: req.params.id });
+      const book = await Book.findOne({ _id: req.params.id });
 
-        if (book.userId !== req.auth.userId) {
-            return res.status(401).json({ message: 'Non autorisé' });
-        }
+      if (book.userId !== req.auth.userId) {
+          return res.status(401).json({ message: 'Non autorisé' });
+      }
 
-        await Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id });
-        res.status(200).json({ message: 'Livre modifié' });
-    } catch (error) {
-        res.status(404).json({ error });
-    }
+      if (req.file && book.imageUrl) {
+          const oldFilename = book.imageUrl.split('/images/')[1];
+          const newFilename = bookObject.imageUrl.split('/images/')[1];
+
+          if (oldFilename !== newFilename) {
+              await fs.unlink(`images/${oldFilename}`);
+          }
+      }
+
+      await Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id });
+      res.status(200).json({ message: 'Livre modifié' });
+  } catch (error) {
+      res.status(404).json({ error });
+  }
 };
+
 
 
 exports.deleteBook = async (req, res, next) => {
